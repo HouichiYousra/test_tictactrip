@@ -6,10 +6,10 @@ export function justifyText(text: string): string {
 
     words.forEach(word => {
         const lineLength = currentLine.join(' ').length;
-        if (lineLength + word.length + 1 <= maxLineLength) {
+        if (lineLength + word.length + (currentLine.length > 0 ? 1 : 0) <= maxLineLength) {
             currentLine.push(word);
         } else {
-            lines.push(currentLine.join(' '));
+            lines.push(justifyLine(currentLine, maxLineLength));
             currentLine = [word];
         }
     });
@@ -19,4 +19,24 @@ export function justifyText(text: string): string {
     }
 
     return lines.join('\n');
+}
+
+function justifyLine(line: string[], maxLineLength: number): string {
+    const totalSpaces = maxLineLength - line.join('').length;
+    const gaps = line.length - 1;
+
+    if (gaps === 0) {
+        return line[0];
+    }
+
+    const spacePerGap = Math.floor(totalSpaces / gaps); 
+    const extraSpaces = totalSpaces % gaps; 
+
+    return line.reduce((justified, word, index) => {
+        justified += word;
+        if (index < gaps) {
+            justified += ' '.repeat(spacePerGap + (index < extraSpaces ? 1 : 0));
+        }
+        return justified;
+    }, '');
 }
