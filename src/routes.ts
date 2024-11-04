@@ -3,13 +3,13 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 import { justifyText } from './justify';
-import authenticateToken from './middlewares';
+import {authenticateToken, rateLimit} from './middlewares';
 dotenv.config();
 
 const router = express.Router();
 const JWT_KEY = process.env.JWT_KEY ||'';
 
-router.post('/justify', authenticateToken, (req: any, res: any)=> {
+router.post('/justify', authenticateToken, rateLimit, (req: any, res: any)=> {
     const text = req.body as string;
 
     if (!text) {
