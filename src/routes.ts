@@ -40,15 +40,19 @@ const JWT_KEY = process.env.JWT_KEY ||'';
  *         description: Payment Required - Daily word limit exceeded
  */
 router.post('/justify', authenticateToken, rateLimit, (req: any, res: any)=> {
-    const text = req.body as string;
+    try {
+        const text = typeof req.body === 'string' ? req.body : '';
 
-    if (!text) {
-        return res.status(400).json({ message: 'Text is required to justify' });
-    }
+        if (!text || text.length === 0) {
+            return res.status(400).json({ message: 'Text is required to justify' });
+        }
 
-    const justifiedText = justifyText(text);
-    return res.type('text/plain').send(justifiedText);
-});
+        const justifiedText = justifyText(text);
+        return res.type('text/plain').send(justifiedText);
+    } catch (error) {
+        console.error('Error in /justify route:', error);
+        res.sendStatus(500);
+    }});
 
 /**
  * @swagger
@@ -81,15 +85,19 @@ router.post('/justify', authenticateToken, rateLimit, (req: any, res: any)=> {
  *         description: Bad Request - Email is required
  */
 router.post('/token', (req: any, res: any) => {
-    const { email } = req.body;
+    try{
+        const { email } = req.body;
 
-    if (!email) {
-        return res.status(400).json({ message: 'Email is required' });
-    }
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
 
-    const token = jwt.sign({ email }, JWT_KEY, { expiresIn: '1d' });
+        const token = jwt.sign({ email }, JWT_KEY, { expiresIn: '1d' });
 
-    res.json({ token });
-});
+        res.json({ token });
+    } catch (error) {
+        console.error('Error in /token route:', error);
+        res.sendStatus(500);
+    }});
 
 export default router;

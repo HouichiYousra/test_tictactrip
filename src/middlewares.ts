@@ -4,7 +4,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 const JWT_KEY = process.env.JWT_KEY || '';
-const WORDS_LIMIT = process.env.WORDS_LIMIT || 80000;;
+const WORDS_LIMIT = parseInt(process.env.WORDS_LIMIT || "80000", 10);
+
 
 const authenticateToken = (req: Request, res: Response, next: NextFunction):void => {
     const token = req.headers['authorization']?.split(' ')[1]; //Bearer token format
@@ -39,13 +40,13 @@ const rateLimit = (req: Request, res: Response, next: NextFunction): void => {
         wordCountStore[token] = { count: 0, date: currentDate };
     }
 
-    const { count, date } = wordCountStore[token];
+    const { count , date } = wordCountStore[token];
 
     if (date.toDateString() !== currentDate.toDateString()) {
         wordCountStore[token] = { count: 0, date: currentDate };
     }
-
-    const wordsToJustify = req.body ? req.body.split(/\s+/).length : 0;
+    const textToJustify = req.body as string
+    const wordsToJustify = textToJustify && textToJustify.length > 0 ? textToJustify.split(/\s+/).length : 0;
 
     if (count + wordsToJustify > WORDS_LIMIT) {
         res.status(402).json({ message: 'Payment Required: Daily word limit exceeded' });
@@ -53,7 +54,6 @@ const rateLimit = (req: Request, res: Response, next: NextFunction): void => {
     }
 
     wordCountStore[token].count += wordsToJustify;
-console.log(count)
     next(); 
 };
 
